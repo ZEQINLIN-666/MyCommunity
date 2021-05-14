@@ -163,7 +163,7 @@ public class UserService implements CommunityConstant {
         loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000));
         loginTicketMapper.insertLoginTicket(loginTicket);
 
-        //返回客户端一个登陆凭证
+        //返回客户端一个登陆的凭证
         map.put("ticket",loginTicket.getTicket());
         return map;
     }
