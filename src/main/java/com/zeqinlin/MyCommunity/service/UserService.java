@@ -1,6 +1,8 @@
 package com.zeqinlin.MyCommunity.service;
 
+import com.zeqinlin.MyCommunity.dao.LoginTicketMapper;
 import com.zeqinlin.MyCommunity.dao.UserMapper;
+import com.zeqinlin.MyCommunity.entity.LoginTicket;
 import com.zeqinlin.MyCommunity.entity.User;
 import com.zeqinlin.MyCommunity.util.CommunityConstant;
 import com.zeqinlin.MyCommunity.util.CommunityUtil;
@@ -30,6 +32,9 @@ public class UserService implements CommunityConstant {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
 
     @Autowired
     private MailClient mailClient;
@@ -114,5 +119,56 @@ public class UserService implements CommunityConstant {
         }else {
             return ACTIVATION_FAILURE;
         }
+    }
+
+    public Map<String,Object> login(String username,String password,int expiredSeconds){
+        Map<String,Object> map = new HashMap<>();
+
+        //判断空值
+        if(StringUtils.isBlank("username")){
+            map.put("usernameMsg","用户名不能为空");
+            return map;
+        }
+        if(StringUtils.isBlank("password")){
+            map.put("passwordMsg","密码不能为空");
+            return map;
+        }
+
+        //验证账号
+        User user = userMapper.selectByName(username);
+        if(user == null){
+            map.put("usernameMsg","该账号不存在");
+            return map;
+        }
+
+        //验证状态
+        if(user.getStatus() == 0){
+            map.put("usernameMsg","该账号未激活");
+            return map;
+        }
+
+        //验证密码
+        //先对明文的密码进行加密
+        password = CommunityUtil.md5(password + user.getSalt());
+        if(!user.getPassword().equals(password)){
+            map.put("passwordMsg","密码不正确");
+            return map;
+        }
+
+        //登陆成功，生成登陆凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(CommunityUtil.generateUUID());
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000));
+        loginTicketMapper.insertLoginTicket(loginTicket);
+
+        //返回客户端一个登陆凭证
+        map.put("ticket",loginTicket.getTicket());
+        return map;
+    }
+
+    public void logout(String ticket){
+        loginTicketMapper.updateStatus(ticket,1);
     }
 }
