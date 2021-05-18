@@ -1,5 +1,6 @@
 package com.zeqinlin.MyCommunity.controller;
 
+import com.zeqinlin.MyCommunity.annotation.LoginRequired;
 import com.zeqinlin.MyCommunity.entity.User;
 import com.zeqinlin.MyCommunity.service.UserService;
 import com.zeqinlin.MyCommunity.util.CommunityUtil;
@@ -49,11 +50,13 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+    @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage() {
         return "/site/setting";
     }
 
+    @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
         if (headerImage == null) {
