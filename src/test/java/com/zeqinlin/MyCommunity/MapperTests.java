@@ -37,6 +37,8 @@ public class MapperTests {
     @Autowired
     private LoginTicketMapper loginTicketMapper;
 
+
+
     @Test
     public void testSelectUser(){
         User user = userMapper.selectById(101);
@@ -101,6 +103,16 @@ public class MapperTests {
         loginTicket = loginTicketMapper.selectByTicket("abc");
         System.out.println(loginTicket);
 
+    }
+
+    @Test
+    public void testInsertDiscussPost(){
+        DiscussPost discussPost = new DiscussPost();
+        discussPost.setUserId(101);
+        discussPost.setTitle("广告");
+        discussPost.setContent("hahahahahahahhaha");
+        discussPost.setCreateTime(new Date());
+        discussPostMapper.insertDiscussPost(discussPost);
     }
 
 }
