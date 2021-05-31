@@ -2,9 +2,11 @@ package com.zeqinlin.MyCommunity;
 
 import com.zeqinlin.MyCommunity.dao.DiscussPostMapper;
 import com.zeqinlin.MyCommunity.dao.LoginTicketMapper;
+import com.zeqinlin.MyCommunity.dao.MessageMapper;
 import com.zeqinlin.MyCommunity.dao.UserMapper;
 import com.zeqinlin.MyCommunity.entity.DiscussPost;
 import com.zeqinlin.MyCommunity.entity.LoginTicket;
+import com.zeqinlin.MyCommunity.entity.Message;
 import com.zeqinlin.MyCommunity.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +38,9 @@ public class MapperTests {
 
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+
+    @Autowired
+    private MessageMapper messageMapper;
 
 
 
@@ -115,4 +120,26 @@ public class MapperTests {
         discussPostMapper.insertDiscussPost(discussPost);
     }
 
+    @Test
+    public void testMessageMapper() {
+        List<Message> list = messageMapper.selectConversations(111, 0, 20);
+        for (Message message : list) {
+            System.out.println(message);
+        }
+        System.out.println("===============================================");
+        int count1 = messageMapper.selectConversationCount(111);
+        System.out.println(count1);
+        System.out.println("===============================================");
+        List<Message> letters = messageMapper.selectLetters("111_112", 0, 20);
+        for (Message letter : letters) {
+            System.out.println(letter);
+        }
+        System.out.println("================================================");
+        int count2 = messageMapper.selectLetterCount("111_112");
+        System.out.println(count2);
+        System.out.println("=================================================");
+        int count3 = messageMapper.selectLetterUnreadCount(131, "111_131");
+        System.out.println(count3);
+
+    }
 }
