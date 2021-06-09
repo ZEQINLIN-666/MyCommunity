@@ -1,9 +1,7 @@
 package com.zeqinlin.MyCommunity.controller;
 
-import com.zeqinlin.MyCommunity.entity.Comment;
-import com.zeqinlin.MyCommunity.entity.DiscussPost;
-import com.zeqinlin.MyCommunity.entity.Page;
-import com.zeqinlin.MyCommunity.entity.User;
+import com.zeqinlin.MyCommunity.entity.*;
+import com.zeqinlin.MyCommunity.event.EventProducer;
 import com.zeqinlin.MyCommunity.service.CommentService;
 import com.zeqinlin.MyCommunity.service.DiscussPostService;
 import com.zeqinlin.MyCommunity.service.LikeService;
@@ -48,6 +46,9 @@ public class DiscussPostController  implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(String title, String content) {
@@ -61,6 +62,15 @@ public class DiscussPostController  implements CommunityConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+
+        //触发发帖事件
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
+
 
         //发布错误的异常不在此处处理
         return CommunityUtil.getJSONString(0, "发布成功");
