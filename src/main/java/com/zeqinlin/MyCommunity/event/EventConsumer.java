@@ -62,14 +62,14 @@ public class EventConsumer implements CommunityConstant {
 
         //利用map拼接放回页面的数据
         //用户xxx(userId)评论了你的帖子(entityType)，点击查看详情(entityId)
-        Map<String,Object> content = new HashMap<>();
-        content.put("userId",event.getUserId());
-        content.put("entityType",event.getEntityType());
-        content.put("entityId",event.getEntityId());
+        Map<String, Object> content = new HashMap<>();
+        content.put("userId", event.getUserId());
+        content.put("entityType", event.getEntityType());
+        content.put("entityId", event.getEntityId());
 
-        if(!event.getData().isEmpty()){
-            for(Map.Entry<String,Object> entry:event.getData().entrySet()){
-                content.put(entry.getKey(),entry.getValue());
+        if (!event.getData().isEmpty()) {
+            for (Map.Entry<String, Object> entry : event.getData().entrySet()) {
+                content.put(entry.getKey(), entry.getValue());
             }
         }
         message.setContent(JSONObject.toJSONString(content));
@@ -78,7 +78,7 @@ public class EventConsumer implements CommunityConstant {
 
     //消费发帖事件
     @KafkaListener(topics = {TOPIC_PUBLISH})
-    public void handlePublishMessage(ConsumerRecord record){
+    public void handlePublishMessage(ConsumerRecord record) {
         if (record == null || record.value() == null) {
             logger.error("消息的内容为空");
             return;
@@ -90,6 +90,20 @@ public class EventConsumer implements CommunityConstant {
         }
         DiscussPost post = discussPostService.findDiscussPostById(event.getEntityId());
         elasticsearchService.saveDiscussPost(post);
+    }
 
+    @KafkaListener(topics = {TOPIC_DELETE})
+    public void handleDeleteMessage(ConsumerRecord record) {
+        if (record == null || record.value() == null) {
+            logger.error("消息的内容为空!");
+            return;
+        }
+
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            logger.error("消息格式错误!");
+            return;
+        }
+        elasticsearchService.deleteDiscussPost(event.getEntityId());
     }
 }
